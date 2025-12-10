@@ -1,61 +1,38 @@
 import java.io.*;
 import java.net.*;
-import java.util.*;
+import java.util.Scanner;
 
-public class Client {
+public class Cliente {
+    private static final String HOST = "localhost";
+    private static final int PORTA = 5050;
 
-  private Socket client;
-  private ObjectOutputStream output;
-  private ObjectInputStream input;
-  private String message = "";
+    public static void main(String[] args) throws Exception {
+        System.out.println("=== CLIENTE - Conectando ao servidor " + HOST + ":" + PORTA + " ===\n");
 
-  public void runClient() {
-    try {
-      System.out.println("Step 1: Create a Socket to make connection.");
-      System.out.println("Attempting connection...");
-      client = new Socket(InetAddress.getByName("localhost"), 5050);
+        Socket cliente = new Socket(HOST, PORTA);
+        System.out.println("Conectado ao servidor!\n");
 
-      System.out.println("Connected to: " + client.getInetAddress().getHostName());
+        ObjectOutputStream saida = new ObjectOutputStream(cliente.getOutputStream());
+        ObjectInputStream entrada = new ObjectInputStream(cliente.getInputStream());
 
-      System.out.println("Step 2: Get the output streams.");
-      output = new ObjectOutputStream(client.getOutputStream());
-      System.out.println("Step 2: output.flush()");
-      output.flush();
-      System.out.println("Step 2: Get the input streams.");
-      input = new ObjectInputStream(client.getInputStream());
-      System.out.println("Got I/O streams\n");
+        Scanner teclado = new Scanner(System.in);
+        String mensagemDoServidor;
 
-      // Step 3: Process connection.
-      Scanner scanner = new Scanner(System.in);  // Read user input from terminal
-        
-      do {
-        System.out.print("CLIENT>>> ");
-        message = scanner.nextLine();
-        output.writeObject("CLIENT>>> " + message);
-        output.flush();
-        try {
-          message = (String) input.readObject();
-          System.out.println("\n" + message);
-        } catch (ClassNotFoundException cnfex) {
-          System.out.println("\nUnknown object type received");
-        }
-        
-      } while (!message.equalsIgnoreCase("SERVER>>> SAIR"));
+        do {
+            System.out.print("CLIENT>>> ");
+            String mensagem = "CLIENT>>> " + teclado.nextLine();
+            saida.writeObject(mensagem);
+            saida.flush();
 
-      // Step 4: Close connection.
-      System.out.println("Closing connection.");
-      output.close();
-      input.close();
-      client.close();
-    } catch (EOFException eof) {
-      System.out.println("Server terminated connection");
-    } catch (IOException e) {
-      e.printStackTrace();
+            if (!mensagem.contains("sair")) {
+                mensagemDoServidor = (String) entrada.readObject();
+                System.out.println(mensagemDoServidor);
+            }
+        } while (!mensagem.toLowerCase().contains("sair"));
+
+        System.out.println("\nDesconectando...");
+        entrada.close();
+        saida.close();
+        cliente.close();
     }
-  }
-
-  public static void main(String args[]) {
-    Client app = new Client();
-    app.runClient();
-  }
 }
