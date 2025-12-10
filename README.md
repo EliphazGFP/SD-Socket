@@ -18,3 +18,8 @@ Implementar um chat simples usando Socket em Java:
 ```bash
 javac Servidor.java
 java Servidor
+
+**Terminal 2 - Iniciar o Cliente:**
+Bash
+javac Cliente.java
+java Cliente
