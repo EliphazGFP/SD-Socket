@@ -16,21 +16,24 @@ public class Cliente {
         ObjectInputStream entrada = new ObjectInputStream(cliente.getInputStream());
 
         Scanner teclado = new Scanner(System.in);
-        String mensagemDoServidor;
+        String mensagemEnviada;
+        String mensagemRecebida;
 
         do {
             System.out.print("CLIENT>>> ");
-            String mensagem = "CLIENT>>> " + teclado.nextLine();
-            saida.writeObject(mensagem);
+            mensagemEnviada = "CLIENT>>> " + teclado.nextLine();
+            saida.writeObject(mensagemEnviada);
             saida.flush();
 
-            if (!mensagem.contains("sair")) {
-                mensagemDoServidor = (String) entrada.readObject();
-                System.out.println(mensagemDoServidor);
+            // Só lê resposta do servidor se não for a mensagem de saída
+            if (!mensagemEnviada.toLowerCase().contains("sair")) {
+                mensagemRecebida = (String) entrada.readObject();
+                System.out.println(mensagemRecebida);
             }
-        } while (!mensagem.toLowerCase().contains("sair"));
 
-        System.out.println("\nDesconectando...");
+        } while (!mensagemEnviada.toLowerCase().contains("sair"));
+
+        System.out.println("\nDesconectando do servidor...");
         entrada.close();
         saida.close();
         cliente.close();
